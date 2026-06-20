@@ -1,5 +1,10 @@
 # WorkoutAutoEditor
 
+[![Android Build](https://github.com/Amarel-Taylor-Scott/WorkoutAutoEditor/actions/workflows/android.yml/badge.svg)](https://github.com/Amarel-Taylor-Scott/WorkoutAutoEditor/actions/workflows/android.yml)
+[![Python (vidcut)](https://github.com/Amarel-Taylor-Scott/WorkoutAutoEditor/actions/workflows/python.yml/badge.svg)](https://github.com/Amarel-Taylor-Scott/WorkoutAutoEditor/actions/workflows/python.yml)
+[![Tests: 22 Kotlin + 56 Python](https://img.shields.io/badge/tests-22%20Kotlin%20%2B%2056%20Python-brightgreen)](#tests)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 **Edit a workout video by describing the cut you want — and everything runs
 offline, on your phone.** No upload, no cloud GPU, no per-frame VLM bill.
 
@@ -32,6 +37,74 @@ invoked only on the ~10-15 most ambiguous segments. That is what makes a fully
 on-device edit feasible on consumer hardware.
 
 Full design rationale, layer-by-layer, in [`ARCHITECTURE.md`](ARCHITECTURE.md).
+
+## Pipeline at a glance
+
+The same idea drives both sides of the repo: cheap signals do the structural
+work, the LLM is a surgical tool, and the render is hardware-accelerated.
+
+```mermaid
+flowchart LR
+    I["Plain-English instruction<br/>'Keep my heaviest squats, under 90s'"]
+    V["Workout video"]
+
+    subgraph cheap["Cheap signals (no LLM)"]
+        P["MediaPipe pose<br/>+ audio energy<br/>→ candidate moments"]
+    end
+
+    subgraph llm["Gemma 3 (surgical)"]
+        G["Parse instruction → policy<br/>Label the ~10-15<br/>ambiguous segments"]
+    end
+
+    R["Media3 Transformer<br/>compose surviving<br/>segments → MP4"]
+    O["Cut workout video"]
+
+    I --> G
+    V --> P
+    P --> G
+    G --> R
+    R --> O
+```
+
+On the Android side the render is **Media3 Transformer**; on the desktop
+`vidcut` side it is **ffmpeg**, and the moment-finding is ffmpeg scene/silence
+detection instead of MediaPipe — but the shape (signals → small-LLM edit
+decision → render) is identical.
+
+## Demo
+
+Here is `vidcut` run for real on the bundled `desktop/samples/test.mp4` — a 6.0s
+clip cut down to 3.0s by a local Gemma 4 model deciding which segment to keep.
+Everything below was produced on-device, no cloud calls. The sample is a
+synthetic test pattern (it ships in-repo so the demo is reproducible), so the
+"footage" is color bars — the point is the edit decision, not the content.
+
+![vidcut before/after — top: full 6s input, bottom: the 3s Gemma kept](docs/demo/before-after.png)
+
+<sub>Top row = the full 6s input filmstrip. Bottom row = the 3s the model kept
+(0–3s), dropping the dead-air tail. Rendered output as a GIF:
+[`docs/demo/vidcut-demo.gif`](docs/demo/vidcut-demo.gif).</sub>
+
+**One-command demo** (needs `ffmpeg`/`ffprobe` on PATH and
+[Ollama](https://ollama.com) running a Gemma model):
+
+```bash
+cd desktop
+pip install -e .
+ollama serve &                       # in another terminal
+ollama pull gemma3:1b                 # small + fast; any Gemma tag works
+VIDCUT_MODEL=gemma3:1b vidcut edit samples/test.mp4 -o out.mp4 \
+    -p "Keep the most active moments, drop dead air" --threshold 0.15
+```
+
+The model's own reasoning shows up in the printed plan's `Rationale` /
+`Summary` columns. The full transcript of the run that produced the artifacts
+above is in [`docs/demo/transcript.txt`](docs/demo/transcript.txt).
+
+> **App screenshots / on-device screen recording: TODO** — capturing the
+> Android UI end-to-end needs a physical device or emulator (MediaPipe + Gemma
+> + MediaCodec don't run in CI). The `vidcut` demo above is the runnable proof
+> of the shared pipeline.
 
 ## What it does
 
