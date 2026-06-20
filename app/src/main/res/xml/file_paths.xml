@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Narrowed: only the renders/ subdirectory is shareable via FileProvider.
+  This prevents an intent receiver from being granted access to the model
+  file, training data, recordings, or arbitrary cache contents.
+-->
+<paths>
+    <external-files-path name="renders" path="renders/" />
+</paths>

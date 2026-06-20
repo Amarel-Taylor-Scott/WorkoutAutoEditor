@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <exclude domain="external" path="models/" />
+    <exclude domain="external" path="recordings/" />
+    <exclude domain="external" path="renders/" />
+    <!-- Exclude prefs: the HF token (when EncryptedSharedPreferences is used)
+         is bound to an Android Keystore entry that does not survive a
+         device transfer, so backing it up causes silent corruption on
+         restore. Plain prefs would leak the token in the backup. -->
+    <exclude domain="sharedpref" path="workout_auto_editor_prefs.xml" />
+</full-backup-content>

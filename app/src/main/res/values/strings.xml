@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Workout Auto Editor</string>
+    <string name="processing_channel_name">Video Processing</string>
+    <string name="processing_channel_desc">Foreground notification while editing your workout video</string>
+    <string name="processing_notification_title">Editing your workout</string>
+    <string name="processing_notification_text">This may take several minutes</string>
+</resources>

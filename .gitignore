@@ -1,0 +1,84 @@
+# Gradle
+.gradle/
+build/
+out/
+!gradle-wrapper.jar
+!gradle-wrapper.properties
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+local.properties
+
+# Captures
+captures/
+
+# Generated files
+**/generated/
+**/build/
+
+# Native
+.cxx/
+
+# macOS / Windows / Linux noise
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Signing material — never commit release credentials.
+# debug.keystore is auto-generated; production keystores stay off the repo.
+*.jks
+*.keystore
+*.p12
+keystore.properties
+signing.properties
+
+# Coverage / IDE caches
+.kotlin/
+*.hprof
+
+# Large model blobs — fetched separately, never committed.
+# The Gemma model (~2 GB) downloads on first launch (see ModelDownloader.kt);
+# pose_landmarker_full.task is populated by CI (see app/src/main/assets/README.txt).
+app/src/main/assets/pose_landmarker_full.task
+app/src/main/assets/*.task
+app/src/main/assets/*.litertlm
+app/src/main/assets/*.tflite
+*.task
+*.tflite
+*.litertlm
+*.bin
+
+# Large media (small test fixtures are kept; large captures/exports are not)
+*.mov
+*.mkv
+
+# Claude session state in this checkout (everything under .claude/)
+.claude/
+
+# OneDrive sync artifacts
+*.tmp
+~$*
+
+# CI artifacts
+*.apk
+*.aab
+
+# --- Python side (desktop/vidcut); see desktop/.gitignore for the rest ---
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+*.egg
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+dist/
+.venv/
+venv/
+env/
+.coverage
+htmlcov/
+.env
